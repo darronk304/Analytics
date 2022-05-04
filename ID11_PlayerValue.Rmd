@@ -1,11 +1,12 @@
 ---
-title: "Valuation Model"
+title: "ID11 Player Valuation Model"
 author: "Nicholas Kondo, Luke G, Darron K"
 subtitle: 
 output:
   html_document:
+    toc: true
   df_print: paged
-toc: true 
+
 html_notebook: default
 ---
 
@@ -429,7 +430,7 @@ plot(RF_attacking_midfield)
 ### Central Midfield
 ```{r randomforest-centre_midfield}
 # Removing unnecessary variables
-centre_back1 <- centre_back %>% 
+central_midfield1 <- central_midfield %>% 
     select(-region, -PlayerYearComp_id, -Url, -Season_End_Year, -Squad, 
            -Player, -Nation, -Pos, -Age, -Born, -player_dob, -player_name, 
            -player_num, -squad, -country, -comp_name, -player_nationality, 
@@ -437,16 +438,16 @@ centre_back1 <- centre_back %>%
            -contract_expiry, -player_url) 
 
 # Random Forest
-RF_centre_back <- randomForest(player_market_value_euro ~ .,
-                       data = centre_back1,
+RF_central_midfield <- randomForest(player_market_value_euro ~ .,
+                       data = central_midfield1,
                        type = regression,
                        mtry = 5,
                        na.action = na.roughfix,
                        ntree = 200)
 
 # Plot
-print(RF_centre_back)
-plot(RF_centre_back)
+print(RF_central_midfield)
+plot(RF_central_midfield)
 ```
 
 ### Centre Back
@@ -743,7 +744,7 @@ varImpPlot(RFfit_centreForward_secondStriker, n.var = 15)
 
 ### Right/Left Back
 ```{r random-forest-backs-varImpPlot}
-varImpPlot(RFfit_right_left_backs, n.var = 15)
+varImpPlot(RFfit_right_left_back, n.var = 15)
 ```
 
 ### Right/Left Midfield
@@ -1538,5 +1539,3 @@ varImpPlot(RFfit_winger, n.var = 15)
 `player_market_value_euro`: The valuation of the player in Euros
 
 `date_joined`: The date the player joined
-
-
