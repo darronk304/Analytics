@@ -1,6 +1,6 @@
 ---
 title: "ID11 Player Valuation Model"
-author: "Nicholas Kondo, Luke G, Darron K"
+author: "Nicholas Kondo"
 subtitle: 
 output:
   html_document:
@@ -314,7 +314,7 @@ keepers_adv <- keepers_adv %>%
   mutate(PlayerYearComp_id = paste(Player, Season_End_Year, Comp))
 ```
 
-# Join
+# Joining Tables
 
 Here we are joining and merging all the data sets together using the `inner join` function.  We named this table master, and for duplicate values, we added a suffix: `REMOVEDUPLICATE`, which will appear in all of the duplicate variables.  Then, a code is executed to remove anything containing those string of letters.  This merges all our tables together and remvoes duplicate variables.  
 
@@ -376,7 +376,7 @@ master <- inner_join(x = master,
 master <- master %>% select(-contains("REMOVEDUPLICATE"))
 ```
 
-# Filter 
+# Filtering By Position
 
 Let's separate each player by position.
 ```{r}
@@ -402,7 +402,7 @@ winger <- master %>%
   filter(player_position == 'Right Winger' | player_position == 'Left Winger')
 ```
 
-# Random Forest
+# Random Forest Model
 
 ### Attacking Midfield 
 ```{r randomforest-attacking_midfield}
@@ -420,14 +420,14 @@ RF_attacking_midfield <- randomForest(player_market_value_euro ~ .,
                        type = regression,
                        mtry = 5,
                        na.action = na.roughfix,
-                       ntree = 200)
+                       ntree = 1000)
 
 # Plot
 print(RF_attacking_midfield)
 plot(RF_attacking_midfield)
 ```
 
-### Central Midfield
+### Center Midfield
 ```{r randomforest-centre_midfield}
 # Removing unnecessary variables
 central_midfield1 <- central_midfield %>% 
@@ -443,14 +443,14 @@ RF_central_midfield <- randomForest(player_market_value_euro ~ .,
                        type = regression,
                        mtry = 5,
                        na.action = na.roughfix,
-                       ntree = 200)
+                       ntree = 1000)
 
 # Plot
 print(RF_central_midfield)
 plot(RF_central_midfield)
 ```
 
-### Centre Back
+### Center Back
 ```{r randomforest-centre_back}
 # Removing unnecessary variables
 centre_back1 <- centre_back %>% 
@@ -466,14 +466,13 @@ RF_centre_back <- randomForest(player_market_value_euro ~ .,
                        type = regression,
                        mtry = 5,
                        na.action = na.roughfix,
-                       ntree = 200)
+                       ntree = 1000)
 
 # Plot
 print(RF_centre_back)
 plot(RF_centre_back)
 ```
-
-### Centre Forward and Second Striker
+### Center Forward/Second Striker
 ```{r randomforest-centreForward_secondStriker}
 # Removing unnecessary variables
 centreForward_secondStriker1 <- centreForward_secondStriker %>% 
@@ -489,14 +488,13 @@ RF_centreForward_secondStriker <- randomForest(player_market_value_euro ~ .,
                        type = regression,
                        mtry = 5,
                        na.action = na.roughfix,
-                       ntree = 200)
+                       ntree = 1000)
 
 # Plot
 print(RF_centreForward_secondStriker)
 plot(RF_centreForward_secondStriker)
 ```
-
-### Right and Left Back
+### Right/Left Back
 ```{r randomforest-backs}
 # Removing unnecessary variables
 right_left_back1 <- right_left_back %>% 
@@ -512,13 +510,12 @@ RF_right_left_back <- randomForest(player_market_value_euro ~ .,
                        type = regression,
                        mtry = 5,
                        na.action = na.roughfix,
-                       ntree = 200)
+                       ntree = 1000)
 
 # Plot
 print(RF_right_left_back)
 plot(RF_right_left_back)
 ```
-
 ### Right/Left Midfielders 
 ```{r randomforest-right-left-midfielders}
 # Removing unnecessary variables
@@ -535,13 +532,12 @@ RF_right_left_midfielder <- randomForest(player_market_value_euro ~ .,
                        type = regression,
                        mtry = 5,
                        na.action = na.roughfix,
-                       ntree = 200)
+                       ntree = 1000)
 
 # Plot
 print(RF_right_left_midfielder)
 plot(RF_right_left_midfielder)
 ```
-
 ### Right/Left Wingers
 ```{r randomforest-wingers}
 # Removing unnecessary variables
@@ -558,7 +554,7 @@ RF_winger <- randomForest(player_market_value_euro ~ .,
                        type = regression,
                        mtry = 5,
                        na.action = na.roughfix,
-                       ntree = 200)
+                       ntree = 1000)
 
 # Plot
 print(RF_winger)
@@ -578,8 +574,8 @@ for(mtry in 1:9){
                          data = attacking_midfield1,
                          mtry = mtry,
                          na.action = na.roughfix,
-                         ntree = 200)
-  oob_err[mtry] <- RFfit_attacking_midfield$mse[200]
+                         ntree = 1000)
+  oob_err[mtry] <- RFfit_attacking_midfield$mse[1000]
   
   cat(mtry," ")
 }
@@ -587,8 +583,7 @@ for(mtry in 1:9){
 results_DF <- data.frame(mtry = 1:9, oob_err)
 ggplot(results_DF, aes(x = mtry, y = oob_err)) + geom_point() + theme_minimal() + xlim(1,9)
 ```
-
-### Central Midfield
+### Center Midfield
 ```{r, randomforest-tuning-centre-midfield}
 # All Variables
 rf_mods <- list()
@@ -600,8 +595,8 @@ for(mtry in 1:9){
                          data = central_midfield1,
                          mtry = mtry,
                          na.action = na.roughfix,
-                         ntree = 200)
-  oob_err[mtry] <- RFfit_central_midfield$mse[200]
+                         ntree = 1000)
+  oob_err[mtry] <- RFfit_central_midfield$mse[1000]
   
   cat(mtry," ")
 }
@@ -610,7 +605,7 @@ results_DF <- data.frame(mtry = 1:9, oob_err)
 ggplot(results_DF, aes(x = mtry, y = oob_err)) + geom_point() + theme_minimal() + xlim(1,9)
 ```
 
-### Centre Back
+### Center Back
 ```{r, randomforest-tuning-centre back}
 # All Variables
 rf_mods <- list()
@@ -622,8 +617,8 @@ for(mtry in 1:9){
                          data = centre_back1,
                          mtry = mtry,
                          na.action = na.roughfix,
-                         ntree = 200)
-  oob_err[mtry] <- RFfit_centre_back$mse[200]
+                         ntree = 1000)
+  oob_err[mtry] <- RFfit_centre_back$mse[1000]
   
   cat(mtry," ")
 }
@@ -632,7 +627,7 @@ results_DF <- data.frame(mtry = 1:9, oob_err)
 ggplot(results_DF, aes(x = mtry, y = oob_err)) + geom_point() + theme_minimal() + xlim(1,9)
 ```
 
-### Centre Forward and Second Striker
+### Center Forward/Second Striker
 ```{r, randomforest-tuning-Centre-Forward-and-SecondStriker}
 # All Variables
 rf_mods <- list()
@@ -644,8 +639,8 @@ for(mtry in 1:9){
                          data = centreForward_secondStriker1,
                          mtry = mtry,
                          na.action = na.roughfix,
-                         ntree = 200)
-  oob_err[mtry] <- RFfit_centreForward_secondStriker$mse[200]
+                         ntree = 1000)
+  oob_err[mtry] <- RFfit_centreForward_secondStriker$mse[1000]
   
   cat(mtry," ")
 }
@@ -653,7 +648,6 @@ for(mtry in 1:9){
 results_DF <- data.frame(mtry = 1:9, oob_err)
 ggplot(results_DF, aes(x = mtry, y = oob_err)) + geom_point() + theme_minimal() + xlim(1,9)
 ```
-
 ### Right/Left Back
 ```{r, randomforest-tuning-backs}
 # All Variables
@@ -666,8 +660,8 @@ for(mtry in 1:9){
                          data = right_left_back1,
                          mtry = mtry,
                          na.action = na.roughfix,
-                         ntree = 200)
-  oob_err[mtry] <- RFfit_right_left_back$mse[200]
+                         ntree = 1000)
+  oob_err[mtry] <- RFfit_right_left_back$mse[1000]
   
   cat(mtry," ")
 }
@@ -675,7 +669,6 @@ for(mtry in 1:9){
 results_DF <- data.frame(mtry = 1:9, oob_err)
 ggplot(results_DF, aes(x = mtry, y = oob_err)) + geom_point() + theme_minimal() + xlim(1,9)
 ```
-
 ### Right/Left Midfield
 ```{r, randomforest-tuning-rightleftmidfield}
 # All Variables
@@ -688,8 +681,8 @@ for(mtry in 1:9){
                          data = right_left_midfielder1,
                          mtry = mtry,
                          na.action = na.roughfix,
-                         ntree = 200)
-  oob_err[mtry] <- RFfit_right_left_midfielder$mse[200]
+                         ntree = 1000)
+  oob_err[mtry] <- RFfit_right_left_midfielder$mse[1000]
   
   cat(mtry," ")
 }
@@ -697,7 +690,6 @@ for(mtry in 1:9){
 results_DF <- data.frame(mtry = 1:9, oob_err)
 ggplot(results_DF, aes(x = mtry, y = oob_err)) + geom_point() + theme_minimal() + xlim(1,9)
 ```
-
 ### Right/Left Winger
 ```{r, randomforest-tuning-wingers}
 # All Variables
@@ -710,8 +702,8 @@ for(mtry in 1:9){
                          data = winger1,
                          mtry = mtry,
                          na.action = na.roughfix,
-                         ntree = 200)
-  oob_err[mtry] <- RFfit_winger$mse[200]
+                         ntree = 1000)
+  oob_err[mtry] <- RFfit_winger$mse[1000]
   
   cat(mtry," ")
 }
@@ -726,27 +718,22 @@ ggplot(results_DF, aes(x = mtry, y = oob_err)) + geom_point() + theme_minimal() 
 ```{r random-forest-attacking-varImpPlot}
 varImpPlot(RFfit_attacking_midfield, n.var = 15)
 ```
-
-### Central Midfield
+### Center Midfield
 ```{r random-forest-central-midfield-varImpPlot}
 varImpPlot(RFfit_central_midfield, n.var = 15)
 ```
-
-### Centre Back
+### Center Back
 ```{r random-forest-centre-back-varImpPlot}
 varImpPlot(RFfit_centre_back, n.var = 15)
 ```
-
-### Centre Forward and Second Striker 
+### Center Forward/Second Striker
 ```{r random-forest-centre-forward-secondStriker-varImpPlot}
 varImpPlot(RFfit_centreForward_secondStriker, n.var = 15)
 ```
-
 ### Right/Left Back
 ```{r random-forest-backs-varImpPlot}
 varImpPlot(RFfit_right_left_back, n.var = 15)
 ```
-
 ### Right/Left Midfield
 ```{r random-forest-rightleftmidfield-varImpPlot}
 varImpPlot(RFfit_right_left_midfielder, n.var = 15)
@@ -756,6 +743,7 @@ varImpPlot(RFfit_right_left_midfielder, n.var = 15)
 ```{r random-forest-winger-varImpPlot}
 varImpPlot(RFfit_winger, n.var = 15)
 ```
+
 # Important Variables
 
 ### Attacking Midfield
@@ -766,7 +754,7 @@ varImpPlot(RFfit_winger, n.var = 15)
 
 `Ast_Per`: 
 
-### Central Midfield
+### Center Midfield
 
 `xG +/-` : Expected Goals Scored minus Expected Goals Allowed
 
@@ -784,7 +772,7 @@ varImpPlot(RFfit_winger, n.var = 15)
 
 `Mid_3rd_Touches`
 
-### Centre Forward and Second Striker
+### Center Forward/Second Striker
 
 `xG +/-` : Expected Goals Scored minus Expected Goals Allowed
 
@@ -796,7 +784,7 @@ varImpPlot(RFfit_winger, n.var = 15)
 
 `Comp`
 
-`Mod_3rd`
+`Mid_3rd`
 
 `Low_Height`
 
@@ -822,28 +810,71 @@ varImpPlot(RFfit_winger, n.var = 15)
 
 ### Attacking Midfield
 
-### Central Midfield
+```{r attackingmidfield-lin-reg}
+attackingMidfield_linReg <- lm(player_market_value_euro ~ GCA90_GCA + Ast_Per + xGplus_per_minus,
+                         data = attacking_midfield1)
 
-### Centre Back
+summary(attackingMidfield_linReg)
+```
 
-### Cenre Forward and Second Striker
+### Center Midfield
+
+```{r central-midfield-lin-reg}
+centralMidfield_linReg <- lm(player_market_value_euro ~ SoT_per_90 + PPA + xGplus_per_minus,
+                         data = central_midfield1)
+
+summary(centralMidfield_linReg) 
+```
+
+### Center Back
+
+```{r centre-back-lin-reg}
+centreBack_linReg <- lm(player_market_value_euro ~ Int + Prog_Carries + Comp + xGplus_per_minus,
+                         data = centre_back1)
+
+summary(centreBack_linReg) 
+```
+
+### Centre Forward and Second Striker
+```{r centre-forward-lin-reg}
+centreForward_linReg <- lm(player_market_value_euro ~ xA + Att_3rd_Touches + PPA + xGplus_per_minus,
+                         data = centreForward_secondStriker1)
+
+summary(centreForward_linReg) 
+```
 
 ### Right/Left Back
 
+```{r rightleft-back-lin-reg}
+rightLeftBack_linReg <- lm(player_market_value_euro ~ Comp + Mid_3rd + Low_Height,
+                         data = right_left_back1)
+
+summary(rightLeftBack_linReg) 
+```
+
 ### Right/Left Midfield
+
+```{r rightleft-back-lin-reg}
+rightLeftMidfielder_linReg <- lm(player_market_value_euro ~ SoT_percent + player_age + Tkl + Comp,
+                         data = right_left_midfielder1)
+
+summary(rightLeftMidfielder_linReg) 
+```
 
 ### Right/Left Winger
 
-```{r attacking-lin-reg}
-## Example
-# Attacking_LinReg <- lm(player_market_value_euro ~ GCA_GCA + PPA + xGplus_per_minus,
-                     #    data = Attacking2)
+```{r rightleft-back-lin-reg}
+rightLeftWinger_linReg <- lm(player_market_value_euro ~ PPM + Int_Outcomes + xGplus_per_minus,
+                         data = winger1)
 
-# summary(Attacking_LinReg)
+summary(rightLeftWinger_linReg) 
 ```
 
+# Appendix A: Important Variables
 
-# Appendix
+
+
+# Appendix B: Tables:
 
 ### Standard
 
@@ -1539,3 +1570,5 @@ varImpPlot(RFfit_winger, n.var = 15)
 `player_market_value_euro`: The valuation of the player in Euros
 
 `date_joined`: The date the player joined
+
+
